@@ -96,8 +96,14 @@ async function checarEmails(accessToken) {
             const resumo = email.bodyPreview || 'Sem texto na pré-visualização';
             const indicacaoAnexo = email.hasAttachments ? '📎 Sim' : 'Não';
             
-            // Pega o texto do e-mail (ajuste a variável se no seu código estiver diferente, como email.body.content)
-            let corpoLimpo = email.bodyPreview; 
+            // Pega o corpo INTEIRO do e-mail em vez da prévia de 255 caracteres
+            let corpoLimpo = email.body.content;
+
+            // Filtro rápido para limpar os códigos HTML de e-mails completos
+            corpoLimpo = corpoLimpo.replace(/<br\s*[\/]?>/gi, '\n'); // Transforma a tag <br> em quebra de linha do WhatsApp
+            corpoLimpo = corpoLimpo.replace(/<\/p>/gi, '\n\n');     // Transforma o fim do parágrafo em duas quebras
+            corpoLimpo = corpoLimpo.replace(/<[^>]*>?/gm, '');      // Deleta todo o resto de código HTML que sobrar
+            corpoLimpo = corpoLimpo.replace(/&nbsp;/g, ' ');        // Limpa códigos de espaço
 
             // 1. Apaga os textos automáticos em inglês
             corpoLimpo = corpoLimpo.replace(/Form Submission Data from your website\./gi, '');
