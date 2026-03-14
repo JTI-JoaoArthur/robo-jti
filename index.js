@@ -96,7 +96,24 @@ async function checarEmails(accessToken) {
             const resumo = email.bodyPreview || 'Sem texto na pré-visualização';
             const indicacaoAnexo = email.hasAttachments ? '📎 Sim' : 'Não';
             
-            const mensagemWhatsApp = `*📧 NOVO E-MAIL NA CAIXA - JTI SOLUÇÕES* \n\n*Assunto:* ${email.subject}\n*Anexos:* ${indicacaoAnexo}\n\n*Prévia da Mensagem:*\n${resumo}\n\n_Acesse o Outlook para ler na íntegra e baixar os anexos._`;
+            // Pega o texto do e-mail (ajuste a variável se no seu código estiver diferente, como email.body.content)
+            let corpoLimpo = email.bodyPreview; 
+
+            // 1. Apaga os textos automáticos em inglês
+            corpoLimpo = corpoLimpo.replace(/Form Submission Data from your website\./gi, '');
+            corpoLimpo = corpoLimpo.replace(/New form has been submitted on your website, please open to see details\./gi, '');
+            corpoLimpo = corpoLimpo.replace(/Hello,/gi, '');
+            corpoLimpo = corpoLimpo.replace(/A new form has been submitted on your website\. Details below\./gi, '');
+
+            // 2. Coloca os campos em negrito (adicionando asteriscos)
+            corpoLimpo = corpoLimpo.replace(/Nome/gi, '*Nome:*');
+            corpoLimpo = corpoLimpo.replace(/Email/gi, '*Email:*');
+            corpoLimpo = corpoLimpo.replace(/Telefone/gi, '*Telefone:*');
+
+            // Remove espaços em branco ou quebras de linha extras que sobrarem no começo/fim
+            corpoLimpo = corpoLimpo.trim();
+
+            const mensagemWhatsApp = `📧 NOVO E-MAIL NA CAIXA - JTI SOLUÇÕES 📧\n\n*Assunto:* ${email.subject}\n*Anexos:* ${indicacaoAnexo}\n\n*Mensagem:*\n${corpoLimpo}`;
 
             // Disparando a mensagem para o grupo!
             client.sendMessage(idDoGrupo, mensagemWhatsApp).then(() => {
