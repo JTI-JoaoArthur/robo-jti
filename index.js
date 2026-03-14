@@ -15,7 +15,9 @@ const pca = new PublicClientApplication({
 
 // 2. CONFIGURAÇÃO DO WHATSAPP (A alma que já tínhamos)
 const client = new Client({
-    authStrategy: new LocalAuth()
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
 });
 
 client.on('qr', (qr) => {
