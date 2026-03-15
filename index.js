@@ -119,7 +119,10 @@ async function checarEmails(accessToken) {
             // Remove espaços em branco ou quebras de linha extras que sobrarem no começo/fim
             corpoLimpo = corpoLimpo.trim();
 
-            const mensagemWhatsApp = `📧 NOVO E-MAIL NA CAIXA - JTI SOLUÇÕES 📧\n\n*Assunto:* ${email.subject}\n*Anexos:* ${indicacaoAnexo}\n\n*Mensagem:*\n${corpoLimpo}`;
+            // Pega o endereço de e-mail de quem enviou a mensagem
+            const remetente = email.from ? email.from.emailAddress.address : 'Não identificado';
+
+            const mensagemWhatsApp = `📧 NOVO E-MAIL NA CAIXA - JTI SOLUÇÕES 📧\n\n*De:* ${remetente}\n*Assunto:* ${email.subject}\n*Anexos:* ${indicacaoAnexo}\n\n*Mensagem:*\n${corpoLimpo}`;
 
             // Disparando a mensagem para o grupo!
             client.sendMessage(idDoGrupo, mensagemWhatsApp).then(() => {
