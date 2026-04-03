@@ -13,15 +13,33 @@ function criarCliente() {
         puppeteerOpts.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     }
 
-    client = new Client({
+    const clientOpts = {
         authStrategy: new LocalAuth(),
         puppeteer: puppeteerOpts,
-    });
+    };
 
-    client.on('qr', (qr) => {
-        logger.info('QR Code gerado, escaneie com o WhatsApp');
-        qrcode.generate(qr, { small: true });
-    });
+    const phoneNumber = process.env.WHATSAPP_PHONE_NUMBER;
+    if (phoneNumber) {
+        clientOpts.pairWithPhoneNumber = {
+            phoneNumber,
+            showNotification: true,
+        };
+    }
+
+    client = new Client(clientOpts);
+
+    if (phoneNumber) {
+        client.on('code', (code) => {
+            logger.info({ code }, 'Codigo de pareamento gerado');
+            console.log(`\n>>> CODIGO DE PAREAMENTO: ${code} <<<\n`);
+            console.log('No celular: WhatsApp > Dispositivos conectados > Conectar dispositivo > Conectar com numero de telefone\n');
+        });
+    } else {
+        client.on('qr', (qr) => {
+            logger.info('QR Code gerado, escaneie com o WhatsApp');
+            qrcode.generate(qr, { small: true });
+        });
+    }
 
     client.on('message', async (msg) => {
         if (msg.body === '!id') {
@@ -38,6 +56,7 @@ async function inicializar() {
 }
 
 function onReady(callback) {
+    if (!client) criarCliente();
     client.on('ready', () => {
         logger.info('WhatsApp conectado');
         callback();
